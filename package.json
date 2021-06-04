@@ -1,0 +1,22 @@
+{
+  "name": "grand-chase-mobile-farm-guide-api",
+  "version": "1.0.0",
+  "description": "API that provides data for the GrandChase Mobile Farm Guide App",
+  "author": "Thiago Monteiro de Paula <thiago.suricat@gmail.com>",
+  "keywords": [
+    "grandchase"
+  ],
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "start": "./bin/app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "http-errors": "^1.8.0",
+    "pino": "^6.11.3",
+    "pino-http": "^5.5.0",
+    "pino-pretty": "^5.0.2"
+  }
+}
