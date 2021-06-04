@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = function (req, res) {
+export default (req, res) => {
   res.json({
     hello: 'world!'
   })

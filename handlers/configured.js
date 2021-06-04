@@ -1,7 +1,7 @@
 'use strict'
 
-module.exports = function (opts) {
-  return function (req, res) {
+export default (opts) => {
+  return (req, res) => {
     res.json({
       opts: opts
     })

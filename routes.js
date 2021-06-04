@@ -1,8 +1,8 @@
 'use strict'
-const simple = require('./handlers/simple')
-const configured = require('./handlers/configured')
+import simple from './handlers/simple'
+import configured from './handlers/configured'
 
-module.exports = function (app, opts) {
+export default (app, opts) => {
   // Setup routes, middleware, and handlers
   app.get('/', simple)
   app.get('/configured', configured(opts))
