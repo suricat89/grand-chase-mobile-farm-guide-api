@@ -78,6 +78,8 @@ web_modules/
 .env.staging.debug
 .env.production
 .env.production.debug
+.env.test
+.env.test.debug
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

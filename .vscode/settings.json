@@ -1,0 +1,6 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "jest.autoRun": "off",
+  "jest.jestCommandLine": "npm run prepareTest && npm run jest --"
+}

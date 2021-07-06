@@ -1,0 +1,19 @@
+#!/bin/bash
+
+kernelName="$(uname -s)"
+
+if [ -f ".env.test" ]; then
+  if [ "$kernelName" == "Darwin" ]; then
+      set -a
+      . .env.test
+      set +a
+  elif [ "$kernelName" == "Linux" ] && [ -e "/etc/lsb-release" ]; then
+    source ./.env.test
+  fi
+fi
+
+./scripts/preTest
+
+echo "===> Running tests..."
+
+./node_modules/jest/bin/jest.js -c ./jest.config.js --passWithNoTests --detectOpenHandles --runInBand --forceExit

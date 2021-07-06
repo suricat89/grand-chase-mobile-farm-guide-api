@@ -1,0 +1,10 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "prepareTest",
+      "type": "shell",
+      "command": "source ./.env.test && ts-node jest/jest.pretest.ts"
+    }
+  ]
+}
