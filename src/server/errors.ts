@@ -1,59 +1,58 @@
-import {
-  BAD_REQUEST,
-  CONFLICT,
-  FORBIDDEN,
-  NOT_ACCEPTABLE,
-  NOT_FOUND,
-  PRECONDITION_FAILED,
-  UNAUTHORIZED,
-} from 'http-status';
+import {StatusCodes} from 'http-status-codes';
 
-export class Forbidden extends Error {
+export class CustomError extends Error {
   statusCode: number;
-  constructor() {
-    super();
-    this.statusCode = FORBIDDEN;
+  constructor(statusCode = 500, message?: string) {
+    super(message);
+    this.statusCode = statusCode;
   }
 }
-export class NotFound extends Error {
-  statusCode: number;
-  constructor() {
-    super();
-    this.statusCode = NOT_FOUND;
+
+export class Forbidden extends CustomError {
+  constructor(message?: string) {
+    super(StatusCodes.FORBIDDEN, message);
   }
 }
-export class BadRequest extends Error {
+export class NotFound extends CustomError {
   statusCode: number;
-  constructor() {
-    super();
-    this.statusCode = BAD_REQUEST;
+  constructor(message?: string) {
+    super(StatusCodes.NOT_FOUND, message);
   }
 }
-export class Unauthorized extends Error {
+export class BadRequest extends CustomError {
   statusCode: number;
-  constructor() {
-    super();
-    this.statusCode = UNAUTHORIZED;
+  constructor(message?: string) {
+    super(StatusCodes.BAD_REQUEST, message);
   }
 }
-export class Conflict extends Error {
+export class Unauthorized extends CustomError {
   statusCode: number;
-  constructor() {
-    super();
-    this.statusCode = CONFLICT;
+  constructor(message?: string) {
+    super(StatusCodes.UNAUTHORIZED, message);
   }
 }
-export class NotAcceptable extends Error {
+export class Conflict extends CustomError {
   statusCode: number;
-  constructor() {
-    super();
-    this.statusCode = NOT_ACCEPTABLE;
+  constructor(message?: string) {
+    super(StatusCodes.CONFLICT, message);
   }
 }
-export class PreconditionFailed extends Error {
+export class NotAcceptable extends CustomError {
   statusCode: number;
-  constructor() {
-    super();
-    this.statusCode = PRECONDITION_FAILED;
+  constructor(message?: string) {
+    super(StatusCodes.NOT_ACCEPTABLE, message);
+  }
+}
+export class PreconditionFailed extends CustomError {
+  statusCode: number;
+  constructor(message?: string) {
+    super(StatusCodes.PRECONDITION_FAILED, message);
+  }
+}
+
+export class InternalServerError extends CustomError {
+  statusCode: number;
+  constructor(message?: string) {
+    super(StatusCodes.PRECONDITION_FAILED, message);
   }
 }

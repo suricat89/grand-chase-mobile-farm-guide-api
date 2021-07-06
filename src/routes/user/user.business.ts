@@ -1,8 +1,21 @@
-import {BadRequest} from 'http-errors';
 import Business from '../../common/business';
-import {FullCustomModel} from '../../common/types';
-import {UserSchema} from './types';
+import {CustomFirestoreModel} from '../../../types';
+import {
+  encode as encodePassword,
+  match as matchPassword,
+} from '../../util/crypto';
+import {sign, SignOptions} from 'jsonwebtoken';
+import {UserProfile, UserSchema} from '../../../types';
 import UserRepository from './user.repository';
+import environment from '../../config/environment';
+import {PreconditionFailed, Unauthorized} from '../../server/errors';
+
+export interface IJwtTokenContent {
+  userName: string;
+  profile: UserProfile;
+  iat: number;
+  exp?: number;
+}
 
 export default class UserBusiness extends Business<UserSchema> {
   _userRepository: UserRepository;
@@ -26,7 +39,7 @@ export default class UserBusiness extends Business<UserSchema> {
   async findUsingId(id: string) {
     const users = (await this._userRepository.findById(
       id
-    )) as FullCustomModel<UserSchema>[];
+    )) as CustomFirestoreModel<UserSchema>[];
 
     return this.envelope(users);
   }
@@ -36,21 +49,45 @@ export default class UserBusiness extends Business<UserSchema> {
       user.userName
     );
     if (userExists.length) {
-      throw new BadRequest('Invalid userName. User already exists');
+      throw new PreconditionFailed('Invalid userName. User already exists');
     }
+
+    user.password = await encodePassword(user.password);
 
     const createdUser = await this._userRepository.create(user);
 
     return this.envelope(createdUser);
   }
 
+  async createDefaultAdmin() {
+    const adminExists = await this.findUsingUserName('admin');
+
+    if (adminExists.records.length) {
+      return adminExists;
+    }
+
+    return this.create({
+      userName: 'admin',
+      password: environment.security.defaultAdmin.password,
+      profile: UserProfile.admin,
+    });
+  }
+
   async updateUsingId(id: string, user: UserSchema) {
+    if (user.password) {
+      user.password = await encodePassword(user.password);
+    }
+
     const updatedUser = await this._userRepository.update(id, user);
 
     return this.envelope(updatedUser);
   }
 
   async updateUsingUserName(userName: string, user: UserSchema) {
+    if (user.password) {
+      user.password = await encodePassword(user.password);
+    }
+
     const updatedUser = await this._userRepository.updateUserByUserName(
       userName,
       user
@@ -71,5 +108,35 @@ export default class UserBusiness extends Business<UserSchema> {
     );
 
     return this.envelope(deletedUser);
+  }
+
+  async signInUser(userName: string, password: string) {
+    const user = (
+      await this.findUsingUserName(userName)
+    ).records.pop() as UserSchema;
+
+    if (!user) {
+      throw new Unauthorized('Invalid username/password');
+    }
+    const passwordMatch = await matchPassword(password, user.password);
+    if (!passwordMatch) {
+      throw new Unauthorized('Invalid username/password');
+    }
+
+    const jwtOptions: SignOptions = {};
+    if (environment.security.jwt.expiresIn) {
+      jwtOptions.expiresIn = environment.security.jwt.expiresIn;
+    }
+
+    const token = sign(
+      {
+        userName,
+        profile: user.profile,
+      } as IJwtTokenContent,
+      environment.security.jwt.secretKey,
+      jwtOptions
+    );
+
+    return token;
   }
 }

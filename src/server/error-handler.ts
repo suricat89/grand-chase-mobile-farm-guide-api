@@ -1,31 +1,16 @@
-import {INTERNAL_SERVER_ERROR} from 'http-status';
-import {Request, Response, NextFunction} from 'express';
-import {
-  BadRequest,
-  Conflict,
-  Forbidden,
-  NotAcceptable,
-  NotFound,
-  PreconditionFailed,
-  Unauthorized,
-} from './errors';
+import {StatusCodes} from 'http-status-codes';
+import {ErrorRequestHandler} from 'express';
+import {CustomError} from './errors';
 
-export default (
-  error:
-    | BadRequest
-    | Conflict
-    | Forbidden
-    | NotAcceptable
-    | NotFound
-    | PreconditionFailed
-    | Unauthorized,
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  const code = error.statusCode || INTERNAL_SERVER_ERROR;
-  const message = error.message || 'Internal Error';
+export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
+  let code = StatusCodes.INTERNAL_SERVER_ERROR;
+  let message = 'Internal Server Error';
 
-  res.status(code).json({code, message});
+  if (error instanceof CustomError) {
+    code = error.statusCode;
+    message = error.message;
+  }
+
+  res.status(code).json({code, error: message});
   next(error);
 };

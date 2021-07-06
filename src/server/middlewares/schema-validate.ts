@@ -1,11 +1,11 @@
-import {BAD_REQUEST} from 'http-status';
+import {StatusCodes} from 'http-status-codes';
 import {
   ObjectSchema,
   ValidationOptions,
   ValidationError,
   AlternativesSchema,
 } from 'joi';
-import {ValidateType} from './types';
+import {ValidateType} from '../../../types';
 import {RequestHandler} from 'express';
 
 export default (
@@ -21,21 +21,16 @@ export default (
       next();
     } catch (err) {
       let errors: string[] = [];
+      let errMsg: string = err;
       if (err instanceof ValidationError) {
-        if (err.details?.length) {
-          errors = errors.concat(err.details.map(m => m.message));
-        }
-
-        res.status(BAD_REQUEST).json({
-          code: BAD_REQUEST,
-          message: errors.join(', '),
-        });
-      } else {
-        res.status(BAD_REQUEST).json({
-          code: BAD_REQUEST,
-          errors: err,
-        });
+        errors = errors.concat(err.details.map(m => m.message));
+        errMsg = errors.join(', ');
       }
+
+      res.status(StatusCodes.BAD_REQUEST).json({
+        code: StatusCodes.BAD_REQUEST,
+        error: errMsg,
+      });
     }
   };
 };

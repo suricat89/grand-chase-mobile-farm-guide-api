@@ -39,3 +39,8 @@ export const deleteUserSchema = joi.alternatives().try(
     userName: joi.string().required(),
   })
 );
+
+export const signInSchema = joi.object({
+  userName: joi.string().required(),
+  password: joi.string().required(),
+});

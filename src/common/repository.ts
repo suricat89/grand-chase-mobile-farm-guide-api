@@ -1,7 +1,8 @@
 import firestore from '../config/firestore';
 import {utc} from 'moment';
 import RepositoryQuery from './repositoryQuery';
-import {CustomFirestoreModel, FullCustomModel} from './types';
+import {CustomFirestoreModel} from '../../types';
+import {NotFound} from '../server/errors';
 
 export default class Repository<T> {
   collection: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
@@ -28,7 +29,7 @@ export default class Repository<T> {
       : snapshot.data();
   }
 
-  async create(model: FullCustomModel<T>) {
+  async create(model: CustomFirestoreModel<T>) {
     model = {
       ...model,
       isDeleted: false,
@@ -44,10 +45,15 @@ export default class Repository<T> {
     return model;
   }
 
-  async update(id: string, model: FullCustomModel<T>) {
+  async update(id: string, model: CustomFirestoreModel<T>) {
     model.updatedAt = utc().format();
 
     const snapshot = this.collection.doc(id);
+
+    const firestoreDoc = await snapshot.get();
+    if (!firestoreDoc.exists) {
+      throw new NotFound("Couldn't find any document with provided id");
+    }
 
     await snapshot.set(model, {merge: true});
 
@@ -55,13 +61,17 @@ export default class Repository<T> {
   }
 
   async delete(id: string) {
-    const document: CustomFirestoreModel = {
-      updatedAt: utc().format(),
-      deletedAt: utc().format(),
-      isDeleted: true,
-    };
-
     const snapshot = this.collection.doc(id);
+
+    const firestoreDoc = await snapshot.get();
+    if (!firestoreDoc.exists) {
+      throw new NotFound("Couldn't find any document with provided id");
+    }
+
+    const document = (await snapshot.get()).data() as CustomFirestoreModel<T>;
+    document.updatedAt = utc().format();
+    document.deletedAt = utc().format();
+    document.isDeleted = true;
 
     await snapshot.set(document, {merge: true});
 
