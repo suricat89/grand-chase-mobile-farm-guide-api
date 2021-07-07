@@ -14,8 +14,8 @@ export const getUserSchema = joi.object({
 
 export const userSchema = joi.object({
   userName: joi.string().required(),
-  profile: joi.string().lowercase().valid('admin', 'user').required(),
-  password: joi.string(),
+  profile: joi.string().lowercase().valid('admin', 'user'),
+  password: joi.string().required(),
 });
 
 export const updateUserSchema = joi.alternatives().try(

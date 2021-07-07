@@ -1,0 +1,329 @@
+openapi: '3.0.2'
+info:
+  title: 'Grand Chase Mobile: Farm Guide'
+  version: '1.0'
+tags:
+  - name: Healthcheck
+  - name: User
+servers:
+  - url: http://localhost:5000
+  - url: https://grand-chase-mobile-farm-guide.herokuapp.com
+paths:
+  /ping:
+    get:
+      tags:
+        - 'Healthcheck'
+      responses:
+        '200':
+          description: Ping pong
+  /user:
+    get:
+      security:
+        - BearerAuth: [admin]
+      tags:
+        - 'User'
+      parameters:
+        - name: userName
+          in: query
+          schema:
+            type: string
+        - name: id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: \[OK\] Documents listed with success
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserBusinessEnvelope'
+        '204':
+          description: \[NO_CONTENT\] Found no user
+        '400':
+          description: \[BAD_REQUEST\] Input fields different than expected
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '403':
+          description: \[FORBIDDEN\] User not allowed to access this resource
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '500':
+          description: \[INTERNAL_SERVER_ERROR\] Generic error code
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+    post:
+      security:
+        - BearerAuth: [admin]
+      tags:
+        - 'User'
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/UserSchema'
+                - type: object
+                  required:
+                    - 'userName'
+                    - 'password'
+      responses:
+        '200':
+          description: \[OK\] User created with success
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserBusinessEnvelope'
+        '400':
+          description: \[BAD_REQUEST\] Input fields different than expected
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '403':
+          description: \[FORBIDDEN\] User not allowed to access this resource
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '412':
+          description: \[PRECONDITION_FAILED\] Violated a business rule
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '500':
+          description: \[INTERNAL_SERVER_ERROR\] Generic error code
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+    put:
+      security:
+        - BearerAuth: [admin]
+      tags:
+        - 'User'
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              allOf:
+                - oneOf:
+                    - type: object
+                      required:
+                        - 'id'
+                      properties:
+                        id:
+                          type: string
+                    - type: object
+                      required:
+                        - 'userName'
+                      properties:
+                        userName:
+                          type: string
+                - type: object
+                  properties:
+                    profile:
+                      type: string
+                      enum:
+                        - 'admin'
+                        - 'user'
+                    password:
+                      type: string
+      responses:
+        '200':
+          description: \[OK\] User updated with success
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserBusinessEnvelope'
+        '400':
+          description: \[BAD_REQUEST\] Input fields different than expected
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '403':
+          description: \[FORBIDDEN\] User not allowed to access this resource
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '404':
+          description: \[NOT_FOUND\] Couldn't find any user to update
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '500':
+          description: \[INTERNAL_SERVER_ERROR\] Generic error code
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+    delete:
+      security:
+        - BearerAuth: [admin]
+      tags:
+        - 'User'
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              oneOf:
+                - type: object
+                  required:
+                    - 'id'
+                  properties:
+                    id:
+                      type: string
+                - type: object
+                  required:
+                    - 'userName'
+                  properties:
+                    userName:
+                      type: string
+      responses:
+        '200':
+          description: \[OK\] User deleted with success
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/UserBusinessEnvelope'
+        '400':
+          description: \[BAD_REQUEST\] Input fields different than expected
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '403':
+          description: \[FORBIDDEN\] User not allowed to access this resource
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '404':
+          description: \[NOT_FOUND\] Couldn't find any user to delete
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '500':
+          description: \[INTERNAL_SERVER_ERROR\] Generic error code
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+  /user/signIn:
+    post:
+      tags:
+        - 'User'
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+              required:
+                - 'userName'
+                - 'password'
+              properties:
+                userName:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: \[OK\] User signed in with success
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  auth:
+                    type: boolean
+                  token:
+                    type: string
+        '400':
+          description: \[BAD_REQUEST\] Input fields different than expected
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '401':
+          description: \[UNAUTHORIZED\] User authentication failed
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+        '500':
+          description: \[INTERNAL_SERVER_ERROR\] Generic error code
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/CustomError'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    CustomError:
+      type: object
+      properties:
+        code:
+          type: number
+        error:
+          type: string
+    BusinessEnvelope:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            self:
+              type: string
+        records:
+          type: array
+    BasicFirestoreModel:
+      type: object
+      properties:
+        id:
+          type: string
+        isDeleted:
+          type: boolean
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+    UserSchema:
+      type: object
+      properties:
+        userName:
+          type: string
+        profile:
+          type: string
+          enum:
+            - admin
+            - user
+        password:
+          type: string
+    UserBusinessEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/BusinessEnvelope'
+        - type: object
+          properties:
+            records:
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/UserSchema'
+                  - $ref: '#/components/schemas/BasicFirestoreModel'

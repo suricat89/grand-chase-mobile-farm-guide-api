@@ -1,8 +1,17 @@
 // eslint-disable-next-line node/no-unpublished-import
+import {agent} from 'supertest';
+import {StatusCodes} from 'http-status-codes';
+import {Server} from 'http';
+
 import UserBusiness from '../../routes/user/user.business';
 import {UserProfile} from '../../../types';
-import {Server} from 'http';
-import {bootstrapServer} from '..';
+import {bootstrapServer, initApp} from '..';
+
+let app: Express.Application;
+
+beforeAll(async () => {
+  app = await initApp();
+});
 
 describe('Bootstrap server', () => {
   let defaultAdminId: string;
@@ -36,5 +45,11 @@ describe('Bootstrap server', () => {
 
     await bootstrapServer();
     expect(callbackInvoked).toBeTruthy();
+  });
+
+  it('[SERVER_S_004] [HTTP 200] should ping', async () => {
+    const response = await agent(app).get('/ping');
+
+    expect(response.statusCode).toBe(StatusCodes.OK);
   });
 });
